@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Domovská stránka</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Systém registrace a přihlášení</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/register}">Registrace</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/login}">Přihlášení</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" th:href="@{/logout}">Odhlásit se</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <div class="row">
+        <h1 class="text-center mt-5">Vítejte v systému registrace a přihlášení</h1>
+    </div>
+</div>
+</body>
+</html>

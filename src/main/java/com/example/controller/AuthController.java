@@ -1,44 +1,77 @@
 package com.example.controller;
 
-import com.example.model.User;
-import com.example.repository.UserRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import com.example.dto.UserDto;
+import com.example.entity.User;
+import com.example.service.UserService;
 
-import java.util.Collections;
-import java.util.Optional;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 
-@RestController
-@RequestMapping("/api/auth")
+import java.util.List;
+
+@Controller
 public class AuthController {
+    private UserService userService;
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    @Autowired
+    public void setUserService(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping("/register")
-    public String register(@RequestBody User user) {
-        Optional<User> existingUser = userRepository.findByUsername(user.getUsername());
-        if (existingUser.isPresent()) {
-            return "Uživatel již existuje!";
-        }        
-        
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Collections.singleton("USER"));
-        userRepository.save(user);
-        return "Registrace úspěšná!";
+    // handler method to handle home page request
+    @GetMapping("/index")
+    public String home() {
+        return "index";
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody User user) {
-        Optional<User> foundUser = userRepository.findByUsername(user.getUsername());
-        if (foundUser.isPresent() && passwordEncoder.matches(user.getPassword(), foundUser.get().getPassword())) {
-            return "Přihlášení úspěšné!";
-        }        
-        return "Neplatné přihlašovací údaje!";
+    // handler method to handle user registration form request
+    @GetMapping("/register")
+    public String showRegistrationForm(Model model) {
+        // create model object to store form data
+        UserDto user = new UserDto();
+        model.addAttribute("user", user);
+        return "register";
+    }
+
+    // handler method to handle user registration form submit request
+    @SuppressWarnings("null")
+    @PostMapping("/register/save")
+    public String registration(@Valid @ModelAttribute("user") UserDto userDto,
+                               BindingResult result,
+                               Model model) {
+        User existingUser = userService.findUserByEmail(userDto.getEmail());
+
+        if (existingUser != null && existingUser.getEmail() != null && !existingUser.getEmail().isEmpty()) {
+            result.rejectValue("email", null,
+                    "There is already an account registered with the same email");
+        }
+
+        if (result.hasErrors()) {
+            model.addAttribute("user", userDto);
+            return "/register";
+        }
+
+        userService.saveUser(userDto);
+        return "redirect:/register?success";
+    }
+
+    // handler method to handle list of users
+    @GetMapping("/users")
+    public String users(Model model) {
+        List<UserDto> users = userService.findAllUsers();
+        model.addAttribute("users", users);
+        return "users";
+    }
+
+    // handler method to handle login request
+    @GetMapping("/login")
+    public String login() {
+        return "login";
     }
 }
