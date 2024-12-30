@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-RezervaceSportApplication<rezervace-sport>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.example.RezervaceSportApplication",
+            "projectName": "rezervace-sport",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
