@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Rezervace Sportovišť</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js"></script>
+</head>
+<body>
+
+<!-- Navigační lišta -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand" th:href="@{/index}">RezervaceCZ</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/register}">Registrace</a>
+                </li>
+                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/login}">Přihlášení</a>
+                </li>
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/logout}">Odhlásit se</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Kontejner pro správu rezervací a uživatelů -->
+<div class="container mt-5">
+    <div class="container mt-3">
+        <!-- Zobrazení úspěšné zprávy po smazání nebo aktualizaci -->
+        <div th:if="${param.success}" class="alert alert-info text-center">
+            Rezervace byla úspěšně smazána!
+        </div>
+        <div th:if="${param.updated}" class="alert alert-success text-center">
+            Rezervace byla úspěšně aktualizována!
+        </div>
+
+        <h2 class="text-center mb-4">Seznam rezervací</h2>
+
+        <table class="table table-hover table-bordered shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Sportoviště</th>
+                    <th>Datum</th>
+                    <th>Čas začátku</th>
+                    <th>Čas konce</th>
+                    <th>Poznámka</th>
+                    <th>Uživatel</th>
+                    <th>Upravit</th>
+                    <th>Smazat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="reservation : ${reservations}">
+                    <td th:text="${reservation.title}"></td>
+                    <td th:text="${#temporals.format(reservation.reservationDate, 'yyyy-MM-dd')}"></td>
+                    <td th:text="${#temporals.format(reservation.startTime, 'HH:mm')}"></td>
+                    <td th:text="${#temporals.format(reservation.endTime, 'HH:mm')}"></td>
+                    <td th:text="${reservation.note} ?: '—'"></td>
+                    <td th:text="${reservation.user.name}"></td>
+                    <td>
+                        <!-- Inline editace formulář -->
+                        <form th:action="@{/admin/reservations/edit/{id}(id=${reservation.id})}" method="post">
+                            <button type="submit" class="btn btn-warning btn-sm">Upravit</button>
+                        </form>
+                    </td>
+                    <td>
+                        <form th:action="@{/admin/reservations/delete/{id}(id=${reservation.id})}" method="post">
+                            <button type="submit" class="btn btn-danger btn-sm">Smazat</button>
+                        </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Formulář pro úpravu rezervace (inline editace) -->
+        <div th:if="${editReservation}" class="mt-5">
+            <h3>Upravit rezervaci</h3>
+            <form th:action="@{/admin/reservations/update/{id}(id=${editReservation.id})}" method="post">
+                <div class="mb-3">
+                    <label for="title" class="form-label">Sportoviště</label>
+                    <input type="text" class="form-control" id="title" name="title"
+                           th:value="${editReservation.title}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="startTime" class="form-label">Čas začátku</label>
+                    <input type="time" class="form-control" id="startTime" name="startTime"
+                           th:value="${#temporals.format(editReservation.startTime, 'HH:mm')}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="endTime" class="form-label">Čas konce</label>
+                    <input type="time" class="form-control" id="endTime" name="endTime"
+                           th:value="${#temporals.format(editReservation.endTime, 'HH:mm')}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="note" class="form-label">Poznámka</label>
+                    <textarea class="form-control" id="note" name="note"
+                              th:text="${editReservation.note}"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Uložit změny</button>
+                <a href="/admin" class="btn btn-secondary">Zrušit</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

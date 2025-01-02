@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editace uživatele</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2>Editace uživatele</h2>
+    <form th:action="@{/admin/user/edit/{id}(id=${user.id})}" method="post" th:object="${user}">
+        <div class="form-group">
+            <label>Jméno</label>
+            <input type="text" class="form-control" th:field="*{name}" required>
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" th:field="*{email}" required>
+        </div>
+        <div class="form-group">
+            <label>Role</label>
+            <select class="form-control" th:field="*{role}">
+                <option value="USER">Uživatel</option>
+                <option value="ADMIN">Admin</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Uložit změny</button>
+        <a th:href="@{/admin}" class="btn btn-secondary">Zpět</a>
+    </form>
+</div>
+
+</body>
+</html>

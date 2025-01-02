@@ -5,8 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+/**
+ * Entita představující rezervaci sportoviště.
+ * Tato třída je mapována na tabulku "reservations" v databázi.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,75 +23,36 @@ public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;  // Primární klíč, automaticky generovaný (auto-increment)
 
     @Column(nullable = false)
-    private String title;  // Přidání atributu pro název rezervace
+    private String title;  // Název rezervovaného sportoviště (např. tělocvična, bazén)
 
     @Column(nullable = false)
-    private LocalDateTime reservationDate;
+    private LocalDateTime startTime;  // Čas začátku rezervace
 
     @Column(nullable = false)
-    private int duration;
+    private LocalDateTime endTime;  // Čas ukončení rezervace
+
+    @Column(nullable = false)
+    private LocalDate reservationDate;  // Datum rezervace, automaticky odvozeno ze startTime
 
     @Column
-    private String note;
+    private String note;  // Volitelná poznámka k rezervaci
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)  // Povolit null pro uživatele
-    private User user;    
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;  // Vztah k uživateli, který rezervaci vytvořil
 
-    // Gettery a Settery
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public LocalDateTime getReservationDate() {
-        return reservationDate;
-    }
-
-    public void setReservationDate(LocalDateTime reservationDate) {
-        this.reservationDate = reservationDate;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public void setDuration(int duration) {
-        this.duration = duration;
-    }
-
-    public String getNote() {
-        return note;
-    }
-
-    public void setNote(String note) {
-        this.note = note;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    // Nová metoda pro získání e-mailu uživatele
-    public String getUserEmail() {
-        return user != null ? user.getEmail() : "Neznámý";
+    /**
+     * Metoda pro automatickou aktualizaci reservationDate při nastavení startTime.
+     * Tato metoda je volána před uložením (persist) nebo aktualizací (update) entity.
+     */
+    @PrePersist
+    @PreUpdate
+    public void updateReservationDate() {
+        if (this.startTime != null) {
+            this.reservationDate = this.startTime.toLocalDate();
+        }
     }
 }

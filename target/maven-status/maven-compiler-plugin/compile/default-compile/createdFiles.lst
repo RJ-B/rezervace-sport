@@ -2,11 +2,9 @@ com\example\entity\User.class
 com\example\controller\AuthController.class
 com\example\config\SpringSecurity.class
 com\example\dto\UserDto.class
-com\example\security\CustomUserDetailsService.class
 com\example\RezervaceSportApplication.class
 com\example\entity\Role.class
 com\example\repository\RoleRepository.class
 com\example\entity\Reservation.class
 com\example\repository\UserRepository.class
-com\example\service\UserServiceImpl.class
 com\example\service\UserService.class

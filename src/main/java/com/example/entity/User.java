@@ -9,34 +9,41 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Entita User reprezentuje uživatele v systému.
+ * Uživatel má základní informace jako jméno, e-mail, heslo a seznam rolí.
+ * Používá Lombok pro automatické generování getterů, setterů a konstruktorů.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "users")  // Určuje název tabulky v databázi
 public class User {
 
-    @SuppressWarnings("unused")
-    private static final long serialVersionUID = 1L;
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Automatické generování ID
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false)  // Jméno uživatele je povinné
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true)  // E-mail musí být unikátní a povinný
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false)  // Heslo je povinné
     private String password;
 
+    /**
+     * Mnoho-na-mnoho vztah mezi uživateli a rolemi.
+     * FetchType.EAGER = role jsou načteny hned s uživatelem (bez lazy loadingu).
+     * CascadeType.ALL = všechny operace (persist, merge, remove) se propagují na roli.
+     */
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
-            name = "users_roles",
-            joinColumns = {@JoinColumn(name = "USER_ID", referencedColumnName = "ID")},
-            inverseJoinColumns = {@JoinColumn(name = "ROLE_ID", referencedColumnName = "ID")})
-    private List<Role> roles = new ArrayList<>();
+            name = "users_roles",  // Spojovací tabulka
+            joinColumns = {@JoinColumn(name = "USER_ID", referencedColumnName = "ID")},  // FK na uživatele
+            inverseJoinColumns = {@JoinColumn(name = "ROLE_ID", referencedColumnName = "ID")})  // FK na roli
+    private List<Role> roles = new ArrayList<>();  // Výchozí prázdný seznam rolí
 }

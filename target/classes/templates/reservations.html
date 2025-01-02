@@ -1,73 +1,133 @@
 <!DOCTYPE html>
-<html lang="cs"
-      xmlns:th="http://www.thymeleaf.org">
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rezervace Sportovišť</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-          rel="stylesheet"
-          crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/main.js"></script>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+<!-- Navigační lišta -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
     <div class="container-fluid">
-        <a class="navbar-brand" th:href="@{/index}">Rezervační systém</a>
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link active" th:href="@{/reservations}">Rezervace</a>
+        <a class="navbar-brand" th:href="@{/index}">RezervaceCZ</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/register}">Registrace</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/logout}">Odhlásit se</a>
+                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/login}">Přihlášení</a>
+                </li>
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/logout}">Odhlásit se</a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
 
+<!-- Kontejner pro rezervace -->
 <div class="container mt-5">
-    <h1 class="text-center">Rezervace Sportovišť</h1>
-
-    <div class="row mt-4">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-header text-center">
-                    Vytvořit novou rezervaci
+    <div class="row mt-4 justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header text-center bg-primary text-white">
+                    <h4>Vytvořit novou rezervaci</h4>
                 </div>
                 <div class="card-body">
-                    <form method="post" th:action="@{/reservations/save}">
+                    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
+                    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+
+                    <form method="post" th:action="@{/reservations/save}" onsubmit="return validateReservation()">
                         <div class="form-group mb-3">
-                            <label>Název rezervace</label>
-                            <select class="form-control" name="title" required>
+                            <label for="title" class="form-label">Název rezervace</label>
+                            <select class="form-select" name="title" id="title" required>
                                 <option value="Tělocvična">Tělocvična</option>
                                 <option value="Bazén">Bazén</option>
                                 <option value="Fotbalové hřiště">Fotbalové hřiště</option>
                             </select>
                         </div>
-
+                    
                         <div class="form-group mb-3">
-                            <label>Datum</label>
-                            <input type="date" class="form-control" name="date" required>
+                            <label for="reservationDate" class="form-label">Datum</label>
+                            <input type="date" class="form-control" name="date" id="reservationDate" required>
                         </div>
-
-                        <div class="form-group mb-3">
-                            <label>Čas</label>
-                            <input type="time" class="form-control" name="time" step="1800" required>
-                        </div>                        
-
-                        <div class="form-group mb-3">
-                            <label>Délka (v hodinách)</label>
-                            <input type="number" class="form-control" name="duration" min="1" max="4" required>
+                    
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="startTime" class="form-label">Začátek</label>
+                                <select class="form-select" name="startTime" id="startTime" required>
+                                    <option th:each="slot : ${availableSlots}" th:value="${slot}" th:text="${slot}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="endTime" class="form-label">Konec</label>
+                                <select class="form-select" name="endTime" id="endTime" required>
+                                    <option th:each="slot : ${availableSlots}" th:value="${slot}" th:text="${slot}"></option>
+                                </select>
+                            </div>
                         </div>
-
+                    
                         <div class="form-group mb-3">
-                            <label>Poznámka (volitelné)</label>
-                            <textarea class="form-control" name="note" rows="3"></textarea>
+                            <label for="note" class="form-label">Poznámka (volitelné)</label>
+                            <textarea class="form-control" name="note" id="note" rows="3"></textarea>
                         </div>
-
-                        <button type="submit" class="btn btn-primary">Vytvořit rezervaci</button>
+                    
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-success px-4">Vytvořit rezervaci</button>
+                        </div>
                     </form>
+
+                    <!-- Tato část bude dynamicky aktualizována pomocí AJAXu -->
+<div th:fragment="availableSlots">
+    <select class="form-select" name="startTime" id="startTime" required>
+        <option th:each="slot : ${availableSlots}" th:value="${slot}" th:text="${slot}"></option>
+    </select>
+    <select class="form-select" name="endTime" id="endTime" required>
+        <option th:each="slot : ${availableSlots}" th:value="${slot}" th:text="${slot}"></option>
+    </select>
+</div>
+                    
+                    <script>
+$('#title, #reservationDate').change(function() {
+    var title = $('#title').val();
+    var date = $('#reservationDate').val();
+
+    if (title && date) {
+        // Volání na server pro získání dostupných slotů
+        $.get('/reservations/availableSlots', { title: title, date: date }, function(data) {
+            console.log("AJAX odpověď z backendu:", data); // Zkontroluj, co konkrétně přijde z backendu
+            
+            if (data && data.availableSlots) {
+                $('#startTime').html('');  // Vyprázdníme předchozí možnosti
+                $('#endTime').html('');
+                
+                // Dynamicky přidáme nové možnosti pro start a end time do selectů
+                data.availableSlots.forEach(function(slot) {
+                    $('#startTime').append(new Option(slot, slot));
+                    $('#endTime').append(new Option(slot, slot));
+                });
+            } else {
+                console.error("Chyba: data.availableSlots není k dispozici.");
+            }
+        }).fail(function(xhr, status, error) {
+            console.error("AJAX volání selhalo: " + error);
+        });
+    }
+});
+
+
+                    </script>
+                    
+                    
                 </div>
             </div>
         </div>
@@ -75,35 +135,39 @@
 
     <hr class="mt-5">
 
-    <h2 class="text-center">Vaše rezervace</h2>
-    <table class="table table-striped table-hover mt-4">
-        <thead class="table-dark">
-        <tr>
-            <th>Sportoviště</th>
-            <th>Datum</th>
-            <th>Čas</th>
-            <th>Délka</th>
-            <th>Poznámka</th>
-            <th>Uživatel</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="reservation : ${reservations}">
-            <td th:text="${reservation.title}"></td>
-            <td th:text="${#temporals.format(reservation.reservationDate, 'yyyy-MM-dd')}"></td>
-            <td th:text="${#temporals.format(reservation.reservationDate, 'HH:mm')}"></td>
-            <td th:text="${reservation.duration} + ' h'"></td>
-            <td th:text="${reservation.note} ?: '—'"></td>
-            <td th:text="${reservation.user.email}"></td>
-            <td>
-                <a class="btn btn-danger btn-sm" th:href="@{/reservations/delete/{id}(id=${reservation.id})}">
-                    Zrušit
-                </a>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+    <h2 class="text-center mb-4">Vaše rezervace</h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered shadow-sm">
+            <thead class="table-dark">
+            <tr>
+                <th>Sportoviště</th>
+                <th>Datum</th>
+                <th>Čas začátku</th>
+                <th>Čas konce</th>
+                <th>Poznámka</th>
+                <th>Akce</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="reservation : ${reservations}">
+                <td th:text="${reservation.title}"></td>
+                <td th:text="${#temporals.format(reservation.reservationDate, 'yyyy-MM-dd')}"></td>
+                <td th:text="${#temporals.format(reservation.startTime, 'HH:mm')}"></td>
+                <td th:text="${#temporals.format(reservation.endTime, 'HH:mm')}"></td>
+                <td th:text="${reservation.note} ?: '—'"></td>
+                <td>
+                    <a class="btn btn-outline-danger btn-sm" th:href="@{/reservations/delete/{id}(id=${reservation.id})}">
+                        Zrušit
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
+
+<!-- Bootstrap Script -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

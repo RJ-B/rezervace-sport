@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="cs" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Editace rezervace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h2>Editace rezervace</h2>
+    <form th:action="@{/reservations/edit/{id}(id=${reservation.id})}" method="post" th:object="${reservation}">
+        <div class="form-group mb-3">
+            <label>Název rezervace</label>
+            <input type="text" class="form-control" th:field="*{title}" required>
+        </div>
+        <div class="form-group mb-3">
+            <label>Datum</label>
+            <input type="date" class="form-control" th:field="*{reservationDate}" required>
+        </div>
+        <div class="form-group mb-3">
+            <label>Začátek</label>
+            <input type="time" class="form-control" th:field="*{startTime}" required>
+        </div>
+        <div class="form-group mb-3">
+            <label>Konec</label>
+            <input type="time" class="form-control" th:field="*{endTime}" required>
+        </div>
+        <div class="form-group mb-3">
+            <label>Poznámka</label>
+            <textarea class="form-control" th:field="*{note}"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Uložit změny</button>
+        <a th:href="@{/admin}" class="btn btn-secondary">Zpět</a>
+    </form>
+</div>
+
+</body>
+</html>

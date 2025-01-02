@@ -2,55 +2,80 @@
 <html lang="cs" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrace</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
+
+<!-- Navigace -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" th:href="@{/index}">Systém registrace a přihlášení</a>
-    </div>
-</nav>
-<div class="container">
-    <div class="row col-md-8 offset-md-2">
-        <div class="card">
-            <div class="card-header">
-                <h2 class="text-center">Registrace</h2>
-            </div>
-            <div th:if="${param.success}">
-                <div class="alert alert-info">Úspěšně jste se zaregistrovali!</div>
-            </div>
-            <div class="card-body">
-                <form method="post" th:action="@{/register/save}" th:object="${user}">
-                    <div class="form-group mb-3">
-                        <label for="firstName" class="form-label">Jméno</label>
-                        <input type="text" id="firstName" name="firstName" class="form-control" th:field="*{firstName}" placeholder="Zadejte jméno">
-                        <p th:errors="*{firstName}" class="text-danger" th:if="${#fields.hasErrors('firstName')}"></p>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="lastName" class="form-label">Příjmení</label>
-                        <input type="text" id="lastName" name="lastName" class="form-control" th:field="*{lastName}" placeholder="Zadejte příjmení">
-                        <p th:errors="*{lastName}" class="text-danger" th:if="${#fields.hasErrors('lastName')}"></p>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="email" class="form-label">E-mail</label>
-                        <input type="email" id="email" name="email" class="form-control" th:field="*{email}" placeholder="Zadejte e-mail">
-                        <p th:errors="*{email}" class="text-danger" th:if="${#fields.hasErrors('email')}"></p>
-                    </div>
-                    <div class="form-group mb-3">
-                        <label for="password" class="form-label">Heslo</label>
-                        <input type="password" id="password" name="password" class="form-control" th:field="*{password}" placeholder="Zadejte heslo">
-                        <p th:errors="*{password}" class="text-danger" th:if="${#fields.hasErrors('password')}"></p>
-                    </div>
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary">Registrovat</button>
-                        <span>Máte již účet? <a th:href="@{/login}">Přihlaste se zde</a></span>
-                    </div>
-                </form>
-            </div>
+        <a class="navbar-brand" th:href="@{/index}">RezervaceCZ</a>
+        <div class="collapse navbar-collapse justify-content-end">
+            <ul class="navbar-nav">
+                <li class="nav-item" th:if="${!#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/register}">Registrace</a>
+                </li>
+                <li class="nav-item" th:if="${!#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/login}">Přihlášení</a>
+                </li>
+                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link active" th:href="@{/logout}">Odhlásit se</a>
+                </li>
+            </ul>
         </div>
     </div>
+</nav>
+
+<!-- Kontejner pro registraci -->
+<div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="register-container p-4 border rounded shadow-lg bg-white">
+        <h1 class="text-center mb-4">Registrace</h1>
+
+        <!-- Zobrazení úspěšné registrace -->
+        <div th:if="${param.success}" class="alert alert-info text-center">
+            Úspěšně jste se zaregistrovali!
+        </div>
+
+        <!-- Formulář registrace -->
+        <form method="post" th:action="@{/register/save}" th:object="${user}" onsubmit="return validateForm()">
+            <div class="form-group mb-3">
+                <label for="firstName" class="form-label">Jméno</label>
+                <input type="text" id="firstName" name="firstName" class="form-control" th:field="*{firstName}" placeholder="Zadejte jméno" required>
+                <p th:errors="*{firstName}" class="text-danger" th:if="${#fields.hasErrors('firstName')}"></p>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="lastName" class="form-label">Příjmení</label>
+                <input type="text" id="lastName" name="lastName" class="form-control" th:field="*{lastName}" placeholder="Zadejte příjmení" required>
+                <p th:errors="*{lastName}" class="text-danger" th:if="${#fields.hasErrors('lastName')}"></p>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" id="email" name="email" class="form-control" th:field="*{email}" placeholder="Zadejte e-mail" required>
+                <p th:errors="*{email}" class="text-danger" th:if="${#fields.hasErrors('email')}"></p>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="password" class="form-label">Heslo</label>
+                <input type="password" id="password" name="password" class="form-control" th:field="*{password}" placeholder="Zadejte heslo" required>
+                <p th:errors="*{password}" class="text-danger" th:if="${#fields.hasErrors('password')}"></p>
+            </div>
+
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-primary w-100">Registrovat</button>
+            </div>
+
+            <div class="text-center">
+                <span>Máte již účet? <a th:href="@{/login}" class="text-decoration-none">Přihlaste se zde</a></span>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
